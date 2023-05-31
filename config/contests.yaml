@@ -1,7 +1,7 @@
 id: 1
-name: "Jiangxi ICPC2023 Formal Contests"
-formal_name: "Jiangxi ICPC2023 Formal Contests"
-start_time: "2023-05-21T10:00:00.000+08:00"
+name: "2022年江西省大学生程序设计竞赛"
+formal_name: "2022年江西省大学生程序设计竞赛"
+start_time: "2022-10-23T10:00:00.000+08:00"
 duration: "5:00:00.000"
 scoreboard_freeze_duration: "1:00:00.000"
 penalty_time: 20
