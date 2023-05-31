@@ -32,7 +32,7 @@ def groups_converter(token_st):
                      "token": f"cdA{token_st}"})
             else:
                 groups_list.append({"type": "groups", "id": row[0], "data": {"id": row[0], "name": row[1]},
-                                    "token_st": f"cdA{token_st}"})
+                                    "token": f"cdA{token_st}"})
             token_st += 1
     if DEBUG: print(groups_list)
     return groups_list, token_st
@@ -149,7 +149,7 @@ def problem_converter(token_st):
 def submission_and_judgements_converter(token_id):
     submission = list()
     judgement = list()
-    data = pd.read_csv('niuniu_demo.csv',  usecols=["id","user_id", "problem_id","status","created_date"])
+    data = pd.read_csv('./config/submission.csv',  usecols=["id","user_id", "problem_id","status","created_date"])
     # if DEBUG: print(data)
     cnt = 1000000
     for i,row in data.iterrows():
