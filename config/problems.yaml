@@ -1,0 +1,28 @@
+problem_number: 3
+problem1:
+  id: 1
+  label: "A"
+  name: "Problem A"
+  ordinal: 1
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem2:
+  id: 2
+  label: "B"
+  name: "Problem B"
+  ordinal: 1
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem3:
+  id: 3
+  label: "C"
+  name: "Problem C"
+  ordinal: 1
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1

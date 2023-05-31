@@ -1,0 +1,8 @@
+awards_number: 7
+award1:
+  award_name: "gold-medal"
+  award_citation: "Gold Medalist"
+  team_list: !!python/list
+  - "1"
+  - "2"
+  - "3"
