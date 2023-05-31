@@ -12,7 +12,7 @@ problem2:
   id: 2
   label: "B"
   name: "Problem B"
-  ordinal: 1
+  ordinal: 2
   color: "darkslategray"
   rgb: "#2b2821"
   test_data_count: 1
@@ -21,7 +21,88 @@ problem3:
   id: 3
   label: "C"
   name: "Problem C"
-  ordinal: 1
+  ordinal: 3
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem4:
+  id: 4
+  label: "D"
+  name: "Problem D"
+  ordinal: 4
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem5:
+  id: 5
+  label: "E"
+  name: "Problem E"
+  ordinal: 5
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem6:
+  id: 6
+  label: "F"
+  name: "Problem F"
+  ordinal: 6
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem7:
+  id: 7
+  label: "G"
+  name: "Problem G"
+  ordinal: 7
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem8:
+  id: 8
+  label: "H"
+  name: "Problem H"
+  ordinal: 8
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem9:
+  id: 9
+  label: "I"
+  name: "Problem I"
+  ordinal: 9
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem10:
+  id: 10
+  label: "J"
+  name: "Problem J"
+  ordinal: 10
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem11:
+  id: 11
+  label: "K"
+  name: "Problem K"
+  ordinal: 11
+  color: "darkslategray"
+  rgb: "#2b2821"
+  test_data_count: 1
+  time_limit: 1
+problem12:
+  id: 12
+  label: "L"
+  name: "Problem L"
+  ordinal: 12
   color: "darkslategray"
   rgb: "#2b2821"
   test_data_count: 1
