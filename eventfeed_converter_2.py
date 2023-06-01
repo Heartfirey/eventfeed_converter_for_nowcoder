@@ -1,23 +1,40 @@
+import os
 import json
 import csv
 import time
-
 import yaml
 import pandas as pd
 contests_id = 1
 DEBUG = False
-start_time = "2022-10-23 10:00:00"
+start_time = "2000-01-01 00:00:00"
 style = r"%Y-%m-%d %H:%M:%S"
-# style2 = r"%Y-%m-%d, %H:%M"
-def get_token_str(token_id):
-    return f"cdA{token_id}"
+tool_cfg = dict()
 
-
+def parser_config(config_dir: str = './tool_config.yaml') -> None:
+    global tool_cfg
+    with open(config_dir, 'r', encoding='utf8') as file:
+        tool_cfg = yaml.safe_load(file)
+    print("Detecting config files...")
+    const_keys = ['contest_config', 'problem_config', 'status_config', 'groups_config', 'organizations_info', 'teams_info', 'submission_info']
+    for each_keys in const_keys:
+        if each_keys not in tool_cfg.keys():
+            raise IOError(f"Cannot detect target config: {each_keys}")
+        if not os.path.exists(tool_cfg[each_keys]):
+            raise IOError(f'Target config file {each_keys} -> ({tool_cfg[each_keys]}) not exists!')
+    print("OK.")
+    
 def contests_converter(token=0) -> list:
     with open('./config/contests.yaml', 'r', encoding='utf8') as file:
         contests_info = yaml.safe_load(file)
     contests_dict = {"id": "1", "type": "contest", "op":"create", "data": contests_info}
-    print(contests_dict)
+    # Update contests start time
+    global start_time
+    timeArray = time.strptime(contests_info['start_time'], "%Y-%m-%dT%H:%M:%S.000+08:00")
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+    print("Runnning on contests:", contests_info['name'])
+    print("Contests duration:", contests_info['duration'])
+    print("Scoreboard freeze duration: ", contests_info['scoreboard_freeze_duration'])
+    if DEBUG: print(contests_dict)
     return contests_dict
 
 def add_head():
@@ -251,27 +268,6 @@ def submission_and_judgements_converter(token_id):
     if DEBUG: print(data_list)
     return data_list, token_id
 
-def award_converter(token_st):
-    award_list = list()
-    with open('./config/awards.yaml', 'r', encoding='utf8') as file:
-        awards_info = yaml.safe_load(file)
-    awards_number = awards_info['awards_number']
-    for i in range(1, awards_number + 1):
-        current_award = awards_info[f'award{i}']
-        award_list.append({
-            "id": str(token_st), 
-            "type": "awards",
-            "op":"create",
-            "data": {
-                "id": current_award['award_name'],
-                "team_ids": current_award['team_list'],
-                "citation": current_award['award_citation']
-            }
-        })
-        token_st += 1
-    return award_list, token_st
-
-
 def make_json():
     final_json = list()
     current_token = 14
@@ -309,9 +305,11 @@ def make_json():
             # print(current_event)
             obj.write(current_event)
         
-
+def show_tool_info(version) -> None:
+    print(f"===========| ICPC Contests Eventfeed Converter V{version} |===========")
+    print(f"===========|   Writen by HeartFireY, maomao, Lansong  |===========")
 
 if __name__ == "__main__":
-    # problem_converter(1)
-    # submission_and_judgements_converter(1)
-    make_json()
+    show_tool_info('0.0.1')
+    parser_config()
+    # make_json()

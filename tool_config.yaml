@@ -1,0 +1,7 @@
+contest_config: './config/contests.yaml'
+problem_config: './config/problems.yaml'
+status_config: './config/state_config.yaml'
+groups_config: './config/groups.csv'
+organizations_info: './config/organizations.csv'
+teams_info: './config/teams.csv'
+submission_info: './config/submissions.csv'
