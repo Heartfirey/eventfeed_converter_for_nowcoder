@@ -121,10 +121,9 @@ def state_generater(token_st):
     state_list = list()
     with open('./config/state_config.yaml', 'r', encoding='utf8') as file:
         state_info = yaml.safe_load(file)
-        state_list.append(
-            {"type": "state", "data": {"started": state_info['started']}, "token": get_token_str(token_st)})
-        state_list.append({"id": str(token_st), "type": "state", "op":"create", "data": {"started": state_info['started'], "frozen": state_info['frozen']}})
-        state_list.append({"id": str(token_st), "type": "state", "op":"create", "data": {"started": state_info['started'], "frozen": state_info['frozen'],"ended": state_info['ended']}})
+        state_list.append({"id": str(token_st), "type": "state", "op":"create", "data": {"started": state_info['started']}})
+        state_list.append({"id": str(token_st + 1), "type": "state", "op":"create", "data": {"started": state_info['started'], "frozen": state_info['frozen']}})
+        state_list.append({"id": str(token_st + 2), "type": "state", "op":"create", "data": {"started": state_info['started'], "frozen": state_info['frozen'],"ended": state_info['ended']}})
         token_st += 3
     if DEBUG: print(state_list)
     return state_list, token_st
@@ -204,7 +203,7 @@ def submission_and_judgements_converter(token_id):
             "op":"create",
             "data": {
                 "id": str(cnt),
-                "submission_id": row[0],
+                "submission_id": str(row[0]),
                 "start_contest_time": st,
                 "start_time": otherStyleTime,
                 "judgement_type_id": None
@@ -222,7 +221,7 @@ def submission_and_judgements_converter(token_id):
                 "judgement_id": str(cnt),
                 "judgement_type_id": status,
                 "ordinal": 1,
-                "run_time": 0.001,
+                "run_time": 0.1,
                 "contest_time": rt,
                 "time": otherStyleTime
             }
@@ -233,12 +232,12 @@ def submission_and_judgements_converter(token_id):
         data_list.append({
             "id": str(token_id), 
             "type": "judgements",
-            "op":"create",
+            "op":"update",
             "data": {
                 "id": str(cnt),
                 "submission_id": str(row[0]),
                 "judgement_type_id": status,
-                "max_run_time": 0.001,
+                "max_run_time": 0.1,
                 "start_contest_time": st,
                 "start_time": otherStyleTime,
                 "end_contest_time": ed,
