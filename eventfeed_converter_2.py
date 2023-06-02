@@ -9,13 +9,18 @@ DEBUG = False
 start_time = "2000-01-01 00:00:00"
 style = r"%Y-%m-%d %H:%M:%S"
 tool_cfg = dict()
+affiliations_id_list = list()
+affiliations_id2name_dict = dict()      # The map of affiliations id and name
+affiliations_name2id_dict = dict()      # The map of affiliations name and id
+affiliations_id2teamicpcid_dict = dict()      # The map-list of affliations id and teams icpc id
+
 
 def parser_config(config_dir: str = './tool_config.yaml') -> None:
     global tool_cfg
     with open(config_dir, 'r', encoding='utf8') as file:
         tool_cfg = yaml.safe_load(file)
     print("Detecting config files...")
-    const_keys = ['contest_config', 'problem_config', 'status_config', 'groups_config', 'organizations_info', 'teams_info', 'submission_info']
+    const_keys = ['contest_config', 'problem_config', 'status_config', 'groups_config', 'organizations_info', 'teams_info', 'submissions_info']
     for each_keys in const_keys:
         if each_keys not in tool_cfg.keys():
             raise IOError(f"Cannot detect target config: {each_keys}")
@@ -24,7 +29,7 @@ def parser_config(config_dir: str = './tool_config.yaml') -> None:
     print("OK.")
     
 def contests_converter(token=0) -> list:
-    with open('./config/contests.yaml', 'r', encoding='utf8') as file:
+    with open(tool_cfg['contest_config'], 'r', encoding='utf8') as file:
         contests_info = yaml.safe_load(file)
     contests_dict = {"id": "1", "type": "contest", "op":"create", "data": contests_info}
     # Update contests start time
@@ -56,7 +61,7 @@ def add_head():
 
 def groups_converter(token_st):
     groups_list = list()
-    with open("./config/groups.csv", "r", encoding="utf-8") as f:
+    with open(tool_cfg['groups_config'], "r", encoding="utf-8") as f:
         reader = csv.reader(f)
         for row in reader:
             if row[1] == "groups_name": continue
@@ -71,10 +76,13 @@ def groups_converter(token_st):
 
 def organizations_converter(token_st):
     organizations_list = list()
-    with open("./config/organizations.csv", "r", encoding="utf-8") as f:
+    with open(tool_cfg['organizations_info'], "r", encoding="utf-8") as f:
         reader = csv.reader(f)
         for row in reader:
             if row[0] == "id": continue
+            affiliations_id_list.append(row[0])         # Add current organization id to affiliation list
+            affiliations_id2name_dict[row[0]] = row[1]  
+            affiliations_name2id_dict[row[1]] = row[0]
             organizations_list.append({
                 "id": str(token_st), 
                 "type": "organizations",
@@ -85,8 +93,8 @@ def organizations_converter(token_st):
                     "formal_name": row[2],
                     "logo": [
                         {
-                            "href": f"contests/4/organizations/{contests_id}/logo64x64",
-                            "filename": "logo64x64.png",
+                            "href": f".\\contest_export\\organizations\\{row[0]}\\logo",
+                            "filename": "logo.png",
                             "mime": "image/png",
                             "width": 64,
                             "height": 64
@@ -101,27 +109,37 @@ def organizations_converter(token_st):
 
 def teams_converter(token_st):
     teams_list = list()
-    with open("./config/teams.csv", "r", encoding="utf-8") as f:
+    with open(tool_cfg['teams_info'], "r", encoding="utf-8") as f:
         reader = csv.reader(f)
         for row in reader:
             if row[0] == "team_id": continue
+            current_team_id = row[0]
+            current_team_name = row[1]
+            current_team_icpc_id = f"nowcoder_{current_team_id}"
+            current_team_affiliations_id = row[3]
+            current_team_affiliations_name = affiliations_id2name_dict[current_team_affiliations_id]
+            if current_team_affiliations_id not in affiliations_id2teamicpcid_dict.keys():
+                affiliations_id2teamicpcid_dict[current_team_affiliations_id] = list()
+            affiliations_id2teamicpcid_dict[current_team_affiliations_id].append(current_team_icpc_id)
             teams_list.append({
                 "id": str(token_st), 
                 "type": "teams",
                 "op":"create",
                 "data": {
-                    "id": row[0],
-                    "label": row[0],
-                    "name": row[1],
-                    "display_name": row[1],
+                    "id": current_team_id,
+                    "icpc_id": current_team_icpc_id,
+                    "label": current_team_id,
+                    "name": current_team_name,
+                    "display_name": current_team_name,
                     "group_ids": [
                         row[2]
                     ],
-                    "organization_id": row[3],
+                    "organization_id": current_team_affiliations_id,
+                    "affiliation": current_team_affiliations_name,
                     "photo": [
                         {
-                            "href": "contests/4/teams/1/photo960x640",
-                            "filename": "photo960x640.jpg",
+                            "href": "contests/4/teams/1/photo",
+                            "filename": "photo.jpg",
                             "mime": "image/jpeg",
                             "width": 960,
                             "height": 640
@@ -136,7 +154,7 @@ def teams_converter(token_st):
 
 def state_generater(token_st):
     state_list = list()
-    with open('./config/state_config.yaml', 'r', encoding='utf8') as file:
+    with open(tool_cfg['status_config'], 'r', encoding='utf8') as file:
         state_info = yaml.safe_load(file)
         state_list.append({"id": str(token_st), "type": "state", "op":"create", "data": {"started": state_info['started']}})
         state_list.append({"id": str(token_st + 1), "type": "state", "op":"create", "data": {"started": state_info['started'], "frozen": state_info['frozen']}})
@@ -148,7 +166,7 @@ def state_generater(token_st):
 
 def problem_converter(token_st):
     problem_list = list()
-    with open('./config/problems.yaml', 'r', encoding='utf8') as file:
+    with open(tool_cfg['problem_config'], 'r', encoding='utf8') as file:
         pbinfo = yaml.safe_load(file)
         # print(pbinfo)
     problem_count = pbinfo['problem_number']
@@ -176,22 +194,20 @@ def problem_converter(token_st):
 
 def submission_and_judgements_converter(token_id):
     data_list = list()
-    data = pd.read_csv('./config/submissions.csv',  usecols=["id","user_id", "problem_id","status","created_date"])
-    # if DEBUG: print(data)
-    cnt = 0
-    run_cnt = 0
-    for i,row in data.iterrows():
+    data = pd.read_csv(tool_cfg['submissions_info'],  usecols=["id","user_id", "problem_id","status","created_date"])
+    cnt, run_cnt = 0, 0
+    for _, row in data.iterrows():
         timeArray = time.strptime(row[4],style)
-        # if DEBUG: print(timeArray)
-        otherStyleTime = time.strftime("%Y-%m-%dT%H:%M:%S.000+08:00", timeArray)
-        otherStyleTime_2 = time.strftime("%Y-%m-%dT%H:%M:%S.901+08:00", timeArray)
-
-        const_time = time.mktime(timeArray) - time.mktime(time.strptime(start_time,r"%Y-%m-%d %H:%M:%S"))
-        # print(time.mktime(timeArray), '@@@', time.mktime(time.strptime(start_time,r"%Y-%m-%d %H:%M:%S")))
-        # st = "{0}:{1}:{2}".format(int(const_time//3600) ,int((const_time - const_time//3600 * 3600) // 60), int(const_time%60) )
-        st = "%1d:%02d:%02d.001" % (int(const_time//3600) ,int((const_time - const_time//3600 * 3600) // 60), int(const_time%60))
-        rt = "%1d:%02d:%02d.301" % (int(const_time//3600) ,int((const_time - const_time//3600 * 3600) // 60), int(const_time%60))
-        ed = "%1d:%02d:%02d.901" % (int(const_time//3600) ,int((const_time - const_time//3600 * 3600) // 60), int(const_time%60))
+        judgements_start_time = time.strftime("%Y-%m-%dT%H:%M:%S.000+08:00", timeArray)
+        judgements_ended_time = time.strftime("%Y-%m-%dT%H:%M:%S.901+08:00", timeArray)
+        # Calculate the time delta
+        delta_time_count = time.mktime(timeArray) - time.mktime(time.strptime(start_time,r"%Y-%m-%d %H:%M:%S"))
+        # Calculate the start, running and end time
+        start_contest_time = "%1d:%02d:%02d.001" % (int(delta_time_count//3600) ,int((delta_time_count - delta_time_count//3600 * 3600) // 60), int(delta_time_count%60))
+        run_contest_time = "%1d:%02d:%02d.301" % (int(delta_time_count//3600) ,int((delta_time_count - delta_time_count//3600 * 3600) // 60), int(delta_time_count%60))
+        end_contest_time = "%1d:%02d:%02d.901" % (int(delta_time_count//3600) ,int((delta_time_count - delta_time_count//3600 * 3600) // 60), int(delta_time_count%60))
+        # Parase judge status
+        # TODO: Parse judge status, current version will make CE as WA!
         status = "WA"
         if row[3] == 5:
             status = "AC"
@@ -207,8 +223,8 @@ def submission_and_judgements_converter(token_id):
                 "team_id": str(int(row[1])),
                 "language_id": "cpp",
                 "files": [],
-                "contest_time": st,
-                "time": otherStyleTime
+                "contest_time": start_contest_time,
+                "time": judgements_start_time
             }
         })
         token_id += 1
@@ -221,8 +237,8 @@ def submission_and_judgements_converter(token_id):
             "data": {
                 "id": str(cnt),
                 "submission_id": str(row[0]),
-                "start_contest_time": st,
-                "start_time": otherStyleTime,
+                "start_contest_time": start_contest_time,
+                "start_time": judgements_start_time,
                 "judgement_type_id": None
             }
         })
@@ -239,8 +255,8 @@ def submission_and_judgements_converter(token_id):
                 "judgement_type_id": status,
                 "ordinal": 1,
                 "run_time": 0.1,
-                "contest_time": rt,
-                "time": otherStyleTime
+                "contest_time": run_contest_time,
+                "time": judgements_start_time
             }
         })
         token_id += 1
@@ -255,10 +271,10 @@ def submission_and_judgements_converter(token_id):
                 "submission_id": str(row[0]),
                 "judgement_type_id": status,
                 "max_run_time": 0.1,
-                "start_contest_time": st,
-                "start_time": otherStyleTime,
-                "end_contest_time": ed,
-                "end_time": otherStyleTime_2
+                "start_contest_time": start_contest_time,
+                "start_time": judgements_start_time,
+                "end_contest_time": end_contest_time,
+                "end_time": judgements_ended_time
             }
         })
         
@@ -268,7 +284,7 @@ def submission_and_judgements_converter(token_id):
     if DEBUG: print(data_list)
     return data_list, token_id
 
-def make_json():
+def make_json(base_directory: str = '.\\contest_export'):
     final_json = list()
     current_token = 14
     # Addd contests
@@ -295,21 +311,48 @@ def make_json():
     # Add submission and judgements
     submission_data_list, current_token = submission_and_judgements_converter(current_token)
     final_json += submission_data_list
-    # Add awards
-    # award_list, current_token = award_converter(current_token)
-    # final_json += award_list
-    with open('./eventfeed.json', 'a+') as obj:
+
+    with open(os.path.join(base_directory, './eventfeed.json'), 'a+') as obj:
         for each_event in final_json:
             current_event = json.dumps(each_event)
             current_event += '\n'
             # print(current_event)
             obj.write(current_event)
+
+def generate_resolver_directory_structure(base_directory: str = '.\\contest_export'):
+    if os.path.exists(base_directory):
+        raise IOError(f'{base_directory} has already exists, please delete it first!')
+    # Make base directory
+    os.makedirs(base_directory)
+    # Make directory structure
+    folder_structures = ['contest', 'organizations', 'teams']
+    for each_folder in folder_structures:
+        os.makedirs(os.path.join(base_directory, each_folder))
+    
+
+def generate_organization_logo_dir(base_directory: str = '.\\contest_export') -> None:
+    print("Generating affiliation logo directory structure...")
+    for current_affiliation_id in affiliations_id_list:
+        current_affiliation_name = affiliations_id2name_dict[current_affiliation_id]
+        current_affiliation_team_number = len(affiliations_id2teamicpcid_dict[current_affiliation_id])
+        if current_affiliation_team_number <= 0:
+            print(f'{current_affiliation_name} has zero teams, so skiped.')
+            return None
+        current_affiliation_example_team_icpcid = affiliations_id2teamicpcid_dict[current_affiliation_id][0]
+        gen_path = os.path.join(base_directory, 'organizations', current_affiliation_example_team_icpcid)
+        os.makedirs(gen_path)
+        print(f"Affiliation '{current_affiliation_name}'(id-{current_affiliation_id}) will using {gen_path} as its logo path!")
+        
         
 def show_tool_info(version) -> None:
-    print(f"===========| ICPC Contests Eventfeed Converter V{version} |===========")
+    print(f"===========|==========================================|===========")
+    print(f"===========| ICPC Resolvers Eventfeed Converter V{version} |===========")
     print(f"===========|   Writen by HeartFireY, maomao, Lansong  |===========")
+    print(f"===========|==========================================|===========")
 
 if __name__ == "__main__":
     show_tool_info('0.0.1')
     parser_config()
-    # make_json()
+    generate_resolver_directory_structure()
+    make_json()
+    # generate_organization_logo_dir()
