@@ -325,9 +325,9 @@ def generate_resolver_directory_structure(base_directory: str = '.\\contest_expo
     # Make base directory
     os.makedirs(base_directory)
     # Make directory structure
-    folder_structures = ['contest', 'organizations', 'teams']
-    for each_folder in folder_structures:
-        os.makedirs(os.path.join(base_directory, each_folder))
+    # folder_structures = ['contest', 'organizations', 'teams']
+    # for each_folder in folder_structures:
+    #     os.makedirs(os.path.join(base_directory, each_folder))
     
 
 def generate_organization_logo_dir(base_directory: str = '.\\contest_export') -> None:
