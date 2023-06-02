@@ -207,11 +207,24 @@ def submission_and_judgements_converter(token_id):
         run_contest_time = "%1d:%02d:%02d.301" % (int(delta_time_count//3600) ,int((delta_time_count - delta_time_count//3600 * 3600) // 60), int(delta_time_count%60))
         end_contest_time = "%1d:%02d:%02d.901" % (int(delta_time_count//3600) ,int((delta_time_count - delta_time_count//3600 * 3600) // 60), int(delta_time_count%60))
         # Parase judge status
-        # TODO: Parse judge status, current version will make CE as WA!
         status = "WA"
-        if row[3] == 5:
-            status = "AC"
+        state_map = {
+            3: "RTE",
+            4: "WA",
+            5: "AC",
+            6: "TLE",
+            7: "MLE",
+            12: "CE",
+        }
         
+        if row[3] in state_map.keys():
+            status = state_map[row[3]]
+        
+        if row[3] == 12:
+            assert status == "CE"
+        if row[3] == 5:
+            assert status == "AC"
+
         # Step1. Add submission info
         data_list.append({
             "id": str(token_id), 
