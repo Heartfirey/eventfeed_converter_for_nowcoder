@@ -10,8 +10,8 @@ start_time = "2000-01-01 00:00:00"
 style = r"%Y-%m-%d %H:%M:%S"
 tool_cfg = dict()
 affiliations_id_list = list()
-affiliations_id2name_dict = dict()      # The map of affiliations id and name
-affiliations_name2id_dict = dict()      # The map of affiliations name and id
+affiliations_id2name_dict = dict()            # The map of affiliations id and name
+affiliations_name2id_dict = dict()            # The map of affiliations name and id
 affiliations_id2teamicpcid_dict = dict()      # The map-list of affliations id and teams icpc id
 
 
@@ -358,10 +358,10 @@ def generate_organization_logo_dir(base_directory: str = '.\\contest_export') ->
         
         
 def show_tool_info(version) -> None:
-    print(f"===========|==========================================|===========")
+    print(f"===========|===========================================|===========")
     print(f"===========| ICPC Resolvers Eventfeed Converter V{version} |===========")
-    print(f"===========|   Writen by HeartFireY, maomao, Lansong  |===========")
-    print(f"===========|==========================================|===========")
+    print(f"===========|   Writen by HeartFireY, maomao, Lansong   |===========")
+    print(f"===========|===========================================|===========")
 
 if __name__ == "__main__":
     show_tool_info('0.0.1')
